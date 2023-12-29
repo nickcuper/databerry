@@ -242,6 +242,8 @@ model Agent {
   externalIntegration ExternalIntegration[]
   serviceProviders    ServiceProvider[]
 
+  job Job[]
+
   nbQueries Int? @default(0) @map("nb_queries")
 
   interfaceConfig Json? @map("interface_config")
@@ -315,6 +317,7 @@ model Conversation {
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
   lead Lead?
+  jobRun JobRun?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -597,6 +600,54 @@ model LLMTaskOutput {
 
   @@unique([type, externalId], name: "unique_external_id")
   @@map("llm_task_outputs")
+}
+
+
+model Job { 
+  id String @id @default(cuid())
+
+  query String
+
+  agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String @map("agent_id")
+
+  interval  JobInterval
+
+  runs JobRun[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("jobs")
+}
+
+model JobRun { 
+  id String @id @default(cuid())
+
+  job   Job?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String? @map("job_id")
+
+
+  conversation  Conversation?   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String? @unique @map("conversation_id")
+
+  status JobStatus @default(QUEUED)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("job_runs")
+}
+
+enum JobInterval {
+  HOURLY
+  WEEKLY
+  DAILY
+}
+
+enum JobStatus {
+  QUEUED
+  PENDING
+  DONE
+  ERROR
 }
 
 enum LLMTaskOutputType {
