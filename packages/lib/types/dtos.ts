@@ -11,6 +11,7 @@ import {
   PromptType,
   ServiceProviderType,
   ToolType,
+  WorkflowInterval,
 } from '@chaindesk/prisma';
 
 import { YOUTUBE_VIDEO_URL_RE } from '../youtube-api/lib';
@@ -320,6 +321,16 @@ export type CreateAgentSchema = z.infer<typeof CreateAgentSchema>;
 
 export const UpdateAgentSchema = CreateAgentSchema.partial();
 export type UpdateAgentSchema = z.infer<typeof UpdateAgentSchema>;
+
+export const createWorkflowSchema = z.object({
+  name: z.string().min(4),
+  description: z.string().min(9).optional(),
+  agentId: z.string().min(8),
+  query: z.string().min(15),
+  interval: z.nativeEnum(WorkflowInterval).default('DAILY'),
+});
+
+export type createWorkflowSchema = z.infer<typeof createWorkflowSchema>;
 
 export const AcceptedDatasourceMimeTypes = [
   'text/csv',

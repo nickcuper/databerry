@@ -1,23 +1,31 @@
-import { JobInterval } from '@prisma/client';
 import { NextApiResponse } from 'next';
-import { z } from 'zod';
 
 import {
   createAuthApiHandler,
   respond,
 } from '@chaindesk/lib/createa-api-handler';
 import { AppNextApiRequest } from '@chaindesk/lib/types';
-import validate from '@chaindesk/lib/validate';
 import { prisma } from '@chaindesk/prisma/client';
 
 const handler = createAuthApiHandler();
 
-export const listJobs = async (
+export const listWorkflows = async (
   req: AppNextApiRequest,
   res: NextApiResponse
 ) => {
-  return prisma.job.findMany();
+  const session = req.session;
+
+  return prisma.workflow.findMany({
+    where: {
+      agent: {
+        organizationId: session?.organization?.id,
+      },
+    },
+    orderBy: {
+      updatedAt: 'desc',
+    },
+  });
 };
 
-handler.get(respond(listJobs));
+handler.get(respond(listWorkflows));
 export default handler;

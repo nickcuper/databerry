@@ -2,6 +2,7 @@ import { NextApiResponse } from 'next';
 import { z } from 'zod';
 
 import AgentManager from '@chaindesk/lib/agent';
+import { ApiError, ApiErrorType } from '@chaindesk/lib/api-error';
 import {
   createAuthApiHandler,
   respond,
@@ -13,18 +14,19 @@ import { prisma } from '@chaindesk/prisma/client';
 const handler = createAuthApiHandler();
 
 const triggerScheam = z.object({
-  jobId: z.string().min(8),
+  workflowId: z.string().min(8),
 });
 
-export const triggerJob = async (
+export const triggerWorkflow = async (
   req: AppNextApiRequest,
   res: NextApiResponse
 ) => {
-  const { jobId } = triggerScheam.parse(req.body);
+  const session = req.session;
+  const { workflowId } = triggerScheam.parse(req.body);
 
-  const job = await prisma.job.findUniqueOrThrow({
+  const workflow = await prisma.workflow.findUniqueOrThrow({
     where: {
-      id: jobId,
+      id: workflowId,
     },
     include: {
       agent: {
@@ -39,19 +41,24 @@ export const triggerJob = async (
     },
   });
 
-  const manager = new AgentManager({ agent: job?.agent });
+  if (workflow?.agent.organizationId !== session.organization.id) {
+    throw new ApiError(ApiErrorType.UNAUTHORIZED);
+  }
 
-  const jobResult = await manager.query({
-    input: job.query,
+  const manager = new AgentManager({ agent: workflow?.agent });
+
+  const workflowResult = await manager.query({
+    input: workflow.query,
   });
 
-  return jobResult;
+  return workflowResult;
 };
 
 handler.post(
   validate({
     body: triggerScheam,
-    handler: respond(triggerJob),
+    handler: respond(triggerWorkflow),
   })
 );
+
 export default handler;

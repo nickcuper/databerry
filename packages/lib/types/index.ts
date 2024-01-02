@@ -30,6 +30,7 @@ export enum RouteNames {
   CHAT_SITE = '/products/crisp-plugin',
   SLACK_BOT = '/products/slack-bot',
   ANALYTICS = '/analytics',
+  WORKFLOWS = '/workflows',
 }
 
 export enum PromptTypesLabels {

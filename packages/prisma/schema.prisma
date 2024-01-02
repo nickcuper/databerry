@@ -242,7 +242,7 @@ model Agent {
   externalIntegration ExternalIntegration[]
   serviceProviders    ServiceProvider[]
 
-  job Job[]
+  workflow Workflow[]
 
   nbQueries Int? @default(0) @map("nb_queries")
 
@@ -317,7 +317,7 @@ model Conversation {
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
   lead Lead?
-  jobRun JobRun?
+  job Job?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -602,29 +602,32 @@ model LLMTaskOutput {
   @@map("llm_task_outputs")
 }
 
-
-model Job { 
+model Workflow { 
   id String @id @default(cuid())
+
+  name String
+
+  description String?
 
   query String
 
   agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String @map("agent_id")
 
-  interval  JobInterval
+  interval  WorkflowInterval
 
-  runs JobRun[]
+  jobs Job[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-  @@map("jobs")
+  @@map("workflows")
 }
 
-model JobRun { 
+model Job { 
   id String @id @default(cuid())
 
-  job   Job?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId String? @map("job_id")
+  workflow   Workflow?   @relation(fields: [workfowId], references: [id], onDelete: Cascade)
+  workfowId String? @map("workflow_id")
 
 
   conversation  Conversation?   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -634,18 +637,19 @@ model JobRun {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-  @@map("job_runs")
+  @@map("job")
 }
 
-enum JobInterval {
+enum WorkflowInterval {
   HOURLY
-  WEEKLY
   DAILY
+  WEEKLY
+  Monthly
 }
 
 enum JobStatus {
   QUEUED
-  PENDING
+  RUNNING
   DONE
   ERROR
 }

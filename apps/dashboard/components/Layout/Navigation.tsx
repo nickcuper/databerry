@@ -1,5 +1,6 @@
 import ApiRoundedIcon from '@mui/icons-material/ApiRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
@@ -247,6 +248,12 @@ export default function Navigation() {
               route: RouteNames.DATASTORES,
               icon: <StorageRoundedIcon fontSize="md" />,
               active: router.route.startsWith(RouteNames.DATASTORES),
+            },
+            {
+              label: 'Workflows',
+              route: RouteNames.WORKFLOWS,
+              icon: <AutoAwesomeIcon fontSize="md" />,
+              active: router.route.startsWith(RouteNames.WORKFLOWS),
             },
             // {
             //   label: 'Analytics',
